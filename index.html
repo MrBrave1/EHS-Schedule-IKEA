@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>JN Lighting India LLP – Daily EHS Activity Schedule</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f0f2f5;
+    --card: #ffffff;
+    --accent: #1a3f6f;
+    --accent2: #e8911a;
+    --text: #1c2340;
+    --muted: #6b748a;
+    --border: #d4d9e5;
+    --ankit: #1a3f6f;
+    --taqdir: #b84a1c;
+    --row-even: #f7f9fc;
+    --row-hover: #eef2fa;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 32px 16px 60px;
+  }
+
+  .header {
+    max-width: 960px;
+    margin: 0 auto 28px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .company {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+  .title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all .18s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-refresh { background: var(--accent); color: #fff; }
+  .btn-refresh:hover { background: #14305a; }
+  .btn-refresh.spinning svg { animation: spin .8s linear infinite; }
+  .btn-print {
+    background: transparent;
+    color: var(--muted);
+    border: 2px solid var(--border);
+  }
+  .btn-print:hover { background: var(--card); color: var(--accent); border-color: var(--accent); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .card {
+    max-width: 960px;
+    margin: 0 auto;
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(26,63,111,.09);
+    overflow: hidden;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--accent); }
+  thead th {
+    padding: 14px 20px;
+    text-align: left;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  thead th:first-child { width: 190px; }
+  thead th:nth-child(2) { color: #a8c4f0; }
+  thead th:nth-child(3) { color: #f5c490; }
+
+  tbody tr:nth-child(even) { background: var(--row-even); }
+  tbody tr { transition: background .12s; }
+  tbody tr:hover { background: var(--row-hover); }
+  tbody td {
+    padding: 13px 20px;
+    font-size: 14.5px;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .time-cell {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .lunch-badge {
+    display: inline-block;
+    background: #fef3e2;
+    color: #9a5800;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid #f5d9a0;
+  }
+  .task-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-ankit  { background: var(--ankit); }
+  .dot-taqdir { background: var(--taqdir); }
+
+  /* States */
+  .state-box {
+    max-width: 960px;
+    margin: 0 auto;
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(26,63,111,.09);
+    padding: 60px 32px;
+    text-align: center;
+    display: none;
+  }
+  .state-box.visible { display: block; }
+  .state-icon { font-size: 40px; margin-bottom: 14px; }
+  .state-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+  .state-msg { font-size: 14px; color: var(--muted); max-width: 440px; margin: 0 auto; line-height: 1.6; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  .page-footer {
+    max-width: 960px;
+    margin: 14px auto 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0 4px;
+  }
+  .legend { display: flex; gap: 20px; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .updated-text { font-size: 12px; color: var(--muted); }
+  .updated-text span { color: var(--accent); font-weight: 600; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .header-right, .page-footer { display: none !important; }
+    .card { box-shadow: none; border-radius: 0; }
+  }
+  @media (max-width: 600px) {
+    .title { font-size: 24px; }
+    thead th, tbody td { padding: 10px 12px; font-size: 13px; }
+    .header { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="company">JN Lighting India LLP</div>
+    <div class="title">EHS Activity Schedule</div>
+    <div class="subtitle">Live from Google Sheets — always up to date</div>
+  </div>
+  <div class="header-right">
+    <button class="btn btn-refresh" id="refreshBtn" onclick="loadSchedule()">
+      <svg id="refreshIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+      Refresh
+    </button>
+    <button class="btn btn-print" onclick="window.print()">🖨 Print</button>
+  </div>
+</div>
+
+<div class="state-box visible" id="loadingBox">
+  <div class="spinner"></div>
+  <div class="state-title">Loading Schedule…</div>
+  <div class="state-msg">Fetching latest data from Google Sheets</div>
+</div>
+
+<div class="state-box" id="errorBox">
+  <div class="state-icon">⚠️</div>
+  <div class="state-title">Could not load schedule</div>
+  <div class="state-msg" id="errorMsg">Please check your internet connection and try refreshing.</div>
+</div>
+
+<div class="card" id="scheduleCard" style="display:none">
+  <table>
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Ankit Task</th>
+        <th>Taqdir Task</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<div class="page-footer" id="pageFooter" style="display:none">
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--ankit)"></div>Ankit</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--taqdir)"></div>Taqdir</div>
+  </div>
+  <div class="updated-text">Last refreshed: <span id="lastUpdated">—</span></div>
+</div>
+
+<script>
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSdTH8wBOK0UgYiPvUG0P795U_bNEBZL8D9UmPPz3bSfqLaoEtdY9lYRflDySMWuHgU6zfUTIssRX-G/pub?gid=0&single=true&output=csv";
+
+  function parseCSV(text) {
+    const lines = text.trim().split("\n").map(l => l.trim()).filter(Boolean);
+    if (lines.length < 2) return [];
+    return lines.slice(1).map(line => {
+      const cols = [];
+      let cur = "", inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"') { inQ = !inQ; }
+        else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
+        else { cur += c; }
+      }
+      cols.push(cur.trim());
+      return { time: cols[0]||"", ankit: cols[1]||"", taqdir: cols[2]||"" };
+    }).filter(r => r.time);
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function cellHTML(text, who) {
+    const t = esc(text);
+    if (/lunch/i.test(text)) return `<span class="lunch-badge">🍽 ${t}</span>`;
+    return `<span class="task-pill"><span class="dot dot-${who}"></span>${t}</span>`;
+  }
+
+  function showState(state) {
+    document.getElementById("loadingBox").classList.toggle("visible", state === "loading");
+    document.getElementById("errorBox").classList.toggle("visible",  state === "error");
+    document.getElementById("scheduleCard").style.display  = state === "done" ? "" : "none";
+    document.getElementById("pageFooter").style.display    = state === "done" ? "" : "none";
+  }
+
+  async function loadSchedule() {
+    showState("loading");
+    const btn = document.getElementById("refreshBtn");
+    btn.classList.add("spinning");
+    try {
+      const res = await fetch(CSV_URL + "&t=" + Date.now());
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const text = await res.text();
+      const rows = parseCSV(text);
+      if (!rows.length) throw new Error("Sheet appears to be empty.");
+      document.getElementById("tableBody").innerHTML = rows.map(r => `
+        <tr>
+          <td class="time-cell">${esc(r.time)}</td>
+          <td>${cellHTML(r.ankit,  'ankit')}</td>
+          <td>${cellHTML(r.taqdir, 'taqdir')}</td>
+        </tr>`).join("");
+      showState("done");
+      const now = new Date();
+      document.getElementById("lastUpdated").textContent =
+        now.toLocaleTimeString('en-IN',  { hour:'2-digit', minute:'2-digit' }) + ", " +
+        now.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+    } catch(e) {
+      document.getElementById("errorMsg").textContent =
+        "Could not fetch the schedule. Make sure the Google Sheet is published as CSV. (" + e.message + ")";
+      showState("error");
+    } finally {
+      btn.classList.remove("spinning");
+    }
+  }
+
+  loadSchedule();
+  setInterval(loadSchedule, 5 * 60 * 1000); // auto-refresh every 5 min
+</script>
+</body>
+</html>
