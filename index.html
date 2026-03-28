@@ -31,7 +31,7 @@
   }
 
   .header {
-    max-width: 960px;
+    max-width: 1020px;
     margin: 0 auto 28px;
     display: flex;
     align-items: flex-end;
@@ -61,6 +61,24 @@
     margin-top: 6px;
     font-weight: 500;
   }
+  /* Week + date badge row */
+  .meta-badges {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: .4px;
+  }
+  .badge-week { background: #e8eef8; color: var(--accent); }
+  .badge-updated { background: #fef3e2; color: #9a5800; border: 1px solid #f5d9a0; }
+
   .header-right {
     display: flex;
     align-items: center;
@@ -94,7 +112,7 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .card {
-    max-width: 960px;
+    max-width: 1020px;
     margin: 0 auto;
     background: var(--card);
     border-radius: 16px;
@@ -105,25 +123,30 @@
   table { width: 100%; border-collapse: collapse; }
   thead tr { background: var(--accent); }
   thead th {
-    padding: 14px 20px;
+    padding: 14px 16px;
     text-align: left;
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     color: #fff;
   }
-  thead th:first-child { width: 190px; }
-  thead th:nth-child(2) { color: #a8c4f0; }
-  thead th:nth-child(3) { color: #f5c490; }
+  /* Time cols narrower */
+  thead th.col-time { width: 160px; color: #c8d8f0; }
+  thead th.col-ankit { color: #a8c4f0; }
+  thead th.col-taqdir { color: #f5c490; }
+
+  /* Divider between the two halves */
+  .divider-col { width: 2px; background: #e0e8f5; padding: 0; }
+  tbody td.divider-col { background: #e8eef8; padding: 0; }
 
   tbody tr:nth-child(even) { background: var(--row-even); }
   tbody tr { transition: background .12s; }
   tbody tr:hover { background: var(--row-hover); }
   tbody td {
-    padding: 13px 20px;
-    font-size: 14.5px;
+    padding: 12px 16px;
+    font-size: 14px;
     font-weight: 500;
     border-bottom: 1px solid var(--border);
     vertical-align: middle;
@@ -132,7 +155,7 @@
 
   .time-cell {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     color: var(--accent);
     white-space: nowrap;
@@ -151,7 +174,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 600;
   }
   .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -160,7 +183,7 @@
 
   /* States */
   .state-box {
-    max-width: 960px;
+    max-width: 1020px;
     margin: 0 auto;
     background: var(--card);
     border-radius: 16px;
@@ -183,7 +206,7 @@
   }
 
   .page-footer {
-    max-width: 960px;
+    max-width: 1020px;
     margin: 14px auto 0;
     display: flex;
     justify-content: space-between;
@@ -201,12 +224,14 @@
   @media print {
     body { background: #fff; padding: 0; }
     .header-right, .page-footer { display: none !important; }
+    .meta-badges { display: none !important; }
     .card { box-shadow: none; border-radius: 0; }
   }
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     .title { font-size: 24px; }
-    thead th, tbody td { padding: 10px 12px; font-size: 13px; }
+    thead th, tbody td { padding: 9px 10px; font-size: 12px; }
     .header { flex-direction: column; align-items: flex-start; }
+    thead th.col-time { width: 110px; }
   }
 </style>
 </head>
@@ -217,6 +242,10 @@
     <div class="company">JN Lighting India LLP</div>
     <div class="title">EHS Activity Schedule</div>
     <div class="subtitle">Live from Google Sheets — always up to date</div>
+    <div class="meta-badges">
+      <span class="badge badge-week" id="weekBadge" style="display:none"></span>
+      <span class="badge badge-updated" id="sheetUpdatedBadge" style="display:none"></span>
+    </div>
   </div>
   <div class="header-right">
     <button class="btn btn-refresh" id="refreshBtn" onclick="loadSchedule()">
@@ -246,9 +275,11 @@
   <table>
     <thead>
       <tr>
-        <th>Time</th>
-        <th>Ankit Task</th>
-        <th>Taqdir Task</th>
+        <th class="col-time">Ankit's Time</th>
+        <th class="col-ankit">Ankit Task</th>
+        <th class="divider-col"></th>
+        <th class="col-time">Taqdir's Time</th>
+        <th class="col-taqdir">Taqdir Task</th>
       </tr>
     </thead>
     <tbody id="tableBody"></tbody>
@@ -268,19 +299,46 @@
 
   function parseCSV(text) {
     const lines = text.trim().split("\n").map(l => l.trim()).filter(Boolean);
-    if (lines.length < 2) return [];
-    return lines.slice(1).map(line => {
-      const cols = [];
-      let cur = "", inQ = false;
-      for (let i = 0; i < line.length; i++) {
-        const c = line[i];
-        if (c === '"') { inQ = !inQ; }
-        else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
-        else { cur += c; }
+    if (lines.length < 2) return { meta: {}, rows: [] };
+
+    // First line may be metadata (company name / title)
+    // Detect header row — it should contain "Time" or "Ankit"
+    let headerIdx = 0;
+    let meta = {};
+    for (let i = 0; i < Math.min(4, lines.length); i++) {
+      const low = lines[i].toLowerCase();
+      if (low.includes('time') || low.includes('ankit')) { headerIdx = i; break; }
+      // Treat earlier rows as meta
+      const cols = splitCSVLine(lines[i]);
+      if (cols[0]) meta.title = (meta.title ? meta.title + ' ' : '') + cols[0];
+      if (cols[1]) meta.week = cols[1];
+      if (cols[2]) meta.updated = cols[2];
+    }
+
+    const dataLines = lines.slice(headerIdx + 1);
+    const rows = dataLines.map(line => {
+      const cols = splitCSVLine(line);
+      if (cols.length >= 4) {
+        return { ankitTime: cols[0]||"", ankit: cols[1]||"", taqdirTime: cols[2]||"", taqdir: cols[3]||"" };
       }
-      cols.push(cur.trim());
-      return { time: cols[0]||"", ankit: cols[1]||"", taqdir: cols[2]||"" };
-    }).filter(r => r.time);
+      // Fallback: 3-col legacy format
+      return { ankitTime: cols[0]||"", ankit: cols[1]||"", taqdirTime: cols[0]||"", taqdir: cols[2]||"" };
+    }).filter(r => r.ankitTime || r.taqdirTime);
+
+    return { meta, rows };
+  }
+
+  function splitCSVLine(line) {
+    const cols = [];
+    let cur = "", inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
+      else { cur += c; }
+    }
+    cols.push(cur.trim());
+    return cols;
   }
 
   function esc(s) {
@@ -288,6 +346,7 @@
   }
 
   function cellHTML(text, who) {
+    if (!text) return '<span style="color:#ccc;font-size:12px">—</span>';
     const t = esc(text);
     if (/lunch/i.test(text)) return `<span class="lunch-badge">🍽 ${t}</span>`;
     return `<span class="task-pill"><span class="dot dot-${who}"></span>${t}</span>`;
@@ -308,18 +367,29 @@
       const res = await fetch(CSV_URL + "&t=" + Date.now());
       if (!res.ok) throw new Error("HTTP " + res.status);
       const text = await res.text();
-      const rows = parseCSV(text);
+      const { meta, rows } = parseCSV(text);
+
       if (!rows.length) throw new Error("Sheet appears to be empty.");
+
+      // Show week / updated badges from sheet metadata
+      const weekBadge = document.getElementById("weekBadge");
+      const updBadge  = document.getElementById("sheetUpdatedBadge");
+      if (meta.week) { weekBadge.textContent = meta.week; weekBadge.style.display = ""; }
+      if (meta.updated) { updBadge.textContent = "Updated " + meta.updated; updBadge.style.display = ""; }
+
       document.getElementById("tableBody").innerHTML = rows.map(r => `
         <tr>
-          <td class="time-cell">${esc(r.time)}</td>
-          <td>${cellHTML(r.ankit,  'ankit')}</td>
+          <td class="time-cell">${esc(r.ankitTime)}</td>
+          <td>${cellHTML(r.ankit, 'ankit')}</td>
+          <td class="divider-col"></td>
+          <td class="time-cell">${esc(r.taqdirTime)}</td>
           <td>${cellHTML(r.taqdir, 'taqdir')}</td>
         </tr>`).join("");
+
       showState("done");
       const now = new Date();
       document.getElementById("lastUpdated").textContent =
-        now.toLocaleTimeString('en-IN',  { hour:'2-digit', minute:'2-digit' }) + ", " +
+        now.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' }) + ", " +
         now.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
     } catch(e) {
       document.getElementById("errorMsg").textContent =
@@ -331,7 +401,7 @@
   }
 
   loadSchedule();
-  setInterval(loadSchedule, 5 * 60 * 1000); // auto-refresh every 5 min
+  setInterval(loadSchedule, 5 * 60 * 1000);
 </script>
 </body>
 </html>
